@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 # Load the CAE model and the latest checkpoint
 model = CAE()
-checkpoint_path = 'bener/'  # Replace with the actual path to your model checkpoint
+checkpoint_path = 'training_models/'  # Replace with the actual path to your model checkpoint
 ckpt = Checkpoint(transformer=model)
 ckpt.restore(latest_checkpoint(checkpoint_path)).expect_partial()
 
