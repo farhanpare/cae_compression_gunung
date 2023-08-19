@@ -33,11 +33,10 @@ def convert_bytes(size, unit=None):
 # Function to compress the image and save it to the server
 def compress_and_save_image(image, image_path):
     compressed_image = compress(model, image)
-    decompressed_image = decompress(model, compressed_image)
-    decompressed_image_array = decompressed_image[0].numpy()
-    decompressed_image_array = (decompressed_image_array * 255.0).astype(np.uint8)
-    decompressed_image_pil = Image.fromarray(decompressed_image_array)
-    decompressed_image_pil.save(image_path)
+    compressed_image_array = compressed_image[0].numpy()
+    compressed_image_array = (compressed_image_array * 255.0).astype(np.uint8)
+    compressed_image_pil = Image.fromarray(compressed_image_array)
+    compressed_image_pil.save(image_path)
 
 # Function to compress the image
 def compress(model, image):
@@ -45,27 +44,6 @@ def compress(model, image):
     image_tensor = tf.convert_to_tensor(image_array, dtype=tf.float32)
     image_tensor = tf.expand_dims(image_tensor, axis=0)
     return image_tensor
-
-# Function to decompress the image
-def decompress(model, compressed_image):
-    return model(compressed_image)
-
-# Additional function to handle image decompression and return the decompressed image path
-def decompress_image(image_path):
-    # Load the compressed image from the specified path
-    compressed_image = load_image(image_path)
-    # Compress the image using the model and then decompress it
-    compressed_tensor = compress(model, compressed_image)
-    decompressed_image = decompress(model, compressed_tensor)
-
-    # Save the decompressed image to a temporary location
-    decompressed_image_path = 'static/decompressed_image.jpg'
-    decompressed_image_array = decompressed_image[0].numpy()
-    decompressed_image_array = (decompressed_image_array * 255.0).astype(np.uint8)
-    decompressed_image_pil = Image.fromarray(decompressed_image_array)
-    decompressed_image_pil.save(decompressed_image_path)
-
-    return decompressed_image_path
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -85,7 +63,7 @@ def index():
         # Load the image from the temporary location
         image = load_image(temp_image_path)
 
-        # Process the image (compression and decompression)
+        # Process the image (compression)
         compress_and_save_image(image, 'static/compressed_image.jpg')
 
         # Get image sizes
@@ -105,45 +83,6 @@ def index():
 
     return render_template('index.html', original_image=None, compressed_image=None)
 
-@app.route('/decompress', methods=['POST'])
-def decompress_route():
-    if 'compressed_image' not in request.files:
-        return "No compressed image file found."
-
-    compressed_image = request.files['compressed_image']
-    if compressed_image.filename == '':
-        return "No selected compressed image."
-
-    # Save the uploaded compressed image to a temporary location
-    temp_compressed_image_path = 'static/temp_compressed_image.jpg'
-    compressed_image.save(temp_compressed_image_path)
-
-    # Perform image decompression and get the path of the decompressed image
-    decompressed_image_path = decompress_image(temp_compressed_image_path)
-
-    # Get image sizes
-    original_image_size = get_image_size('static/temp_image.jpg')
-    compressed_image_size = get_image_size(temp_compressed_image_path)
-    decompressed_image_size = get_image_size(decompressed_image_path)
-
-    # Convert sizes to KB
-    original_image_size = convert_bytes(original_image_size, unit="KB")
-    compressed_image_size = convert_bytes(compressed_image_size, unit="KB")
-    decompressed_image_size = convert_bytes(decompressed_image_size, unit="KB")
-
-    # Paths for displaying images on the page
-    original_image = 'static/temp_image.jpg'
-    compressed_image = 'static/compressed_image.jpg'
-    decompressed_image = decompressed_image_path
-
-    return render_template('index.html', original_image=original_image, compressed_image=compressed_image,
-                           decompressed_image=decompressed_image, original_image_size=original_image_size,
-                           compressed_image_size=compressed_image_size, decompressed_image_size=decompressed_image_size)
-
-@app.route('/back-to-home', methods=['GET'])
-def back_to_home():
-    return redirect('/')
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # Gunakan 5000 sebagai port default
-    app.run(host="0.0.0.0", port=port)
+    app.run(debug=True)
