@@ -113,7 +113,7 @@ class CAE(Model):
         eblock2 = self.e_block_2(eblock1) + eblock1
         eblock3 = self.e_block_3(eblock2) + eblock2
         ec3 = self.e_conv_3(eblock3)
-        return ec3
+        return self.decode(ec3)
   
     def decode(self, encoded_value: Tensor) -> Tensor:
         y = encoded_value
