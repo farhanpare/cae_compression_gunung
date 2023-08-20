@@ -21,13 +21,17 @@
 
       <h2>Compressed Image</h2>
       <p>Size: {{ compressed_image_size }} KB</p>
-      <img src="{{ compressed_image }}" style="max-width: 500px;">
+      <img src="{{ compressed_image }}" style="max-width: 500px; transform: rotate(0deg);">
 
       <h2>Download Images</h2>
       <a href="{{ compressed_image }}" download="compressed_image.jpg">Download Compressed Image</a>
+      
+      <br>
+      <br>
+      <a href="/" class="btn btn-primary" style="margin-top: 10px;">Compress Again</a>
     {% endif %}
 
-  
 
+  <!-- Additional content here -->
   </body>
 </html>
